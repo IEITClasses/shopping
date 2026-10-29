@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>shopping Mart</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+  <style>
+    body {
+      background: #Fabc5364;
+      font-family: Arial, sans-serif;
+    }
+
+    .navbar { background: #fff65374; }
+    .brand { color: #ff6545; font-weight: bold; }
+    .hero {
+      background: linear-gradient(120deg, #658769, #654657);
+      color: white;
+      padding: 65px 20px;
+      border-radius: 16px;
+    }
+    .product-card {
+      border: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform .2s;
+      height: 100%;
+    }
+    .product-card:hover { transform: translateY(-5px); }
+    .product-card img {
+      height: 210px;
+      width: 100%;
+      object-fit: cover;
+      background: white;
+    }
+    .price { color: #198754; font-weight: initial; }
+    .cart-btn { background: #ff6543; border: 5; }
+    footer { background: #212529; color: white; }
+  </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light">
+  <div class="container">
+    <a class="navbar-brand brand" href="#">Shopping Mart</a>
+
+    <button class="navbar-toggler" type="button"
+      data-bs-toggle="collapse" data-bs-target="#menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menu">
+      <ul class="navbar-nav ms-auto me-3">
+        <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#products">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="#footer">Contact</a></li>
+      </ul>
+
+      <form class="d-flex" id="searchForm" role="search">
+        <input class="form-control me-2" id="search"
+          type="search" placeholder="Search products...">
+        <button class="btn btn-warning" type="submit">Search</button>
+      </form>
+
+      <button class="btn btn-outline-light ms-lg-3 mt-2 mt-lg-0"
+        data-bs-toggle="modal" data-bs-target="#cartModal">
+         Cart (<span id="cartCount">0</span>)
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main class="container my-4">
+
+  <section class="hero text-center mb-5">
+    <h1 class="display-4 fw-bold">Sale 30% off!</h1>
+    <p class="lead">Discover your favorite products at great prices.</p>
+    <a href="#products" class="btn btn-warning btn-lg">
+      Shop Now
+    </a>
+  </section>
+
+  <section id="products">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Featured Products</h2>
+      <span class="text-secondary">Best picks for you</span>
+    </div>
+
+    <div class="row g-4" id="productList"></div>
+    <p id="emptyMessage" class="text-center py-5 d-none">
+      No products found.
+    </p>
+  </section>
+</main>
+
+<!-- Cart modal -->
+<div class="modal fade" id="cartModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Your Shopping Cart</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="cartItems"></div>
+      <div class="modal-footer d-flex justify-content-between">
+        <strong>Total: ₹<span id="cartTotal">0</span></strong>
+        <button class="btn btn-success" id="checkoutBtn">
+          Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer id="footer" class="text-center py-4 mt-5">
+  <p class="mb-1">© 2026 ShopEasy</p>
+  <small>Your favorite online shopping destination.</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const products = [
+    { id: 1, name: "Wireless Headphones", price: 1499,
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" },
+    { id: 2, name: "Smart Watch", price: 2499,
+      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500" },
+    { id: 3, name: "Running Shoes", price: 1999,
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" },
+    { id: 4, name: "Backpack", price: 999,
+      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500" },
+    { id: 5, name: "Camera", price: 4999,
+      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500" },
+    { id: 6, name: "Sunglasses", price: 799,
+      image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500" }
+  ];
+
+  const cart = {};
+  const productList = document.getElementById("productList");
+
+  function renderProducts(items) {
+    productList.innerHTML = items.map(p => `
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card product-card shadow-sm">
+          <img src="${p.image}" class="card-img-top"
+            alt="${p.name}" loading="lazy">
+          <div class="card-body">
+            <h5 class="card-title">${p.name}</h5>
+            <p class="price fs-5">₹${p.price.toLocaleString("en-IN")}</p>
+            <button class="btn cart-btn w-100"
+              onclick="addToCart(${p.id})">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    document.getElementById("emptyMessage")
+      .classList.toggle("d-none", items.length !== 0);
+  }
+
+  function addToCart(id) {
+    cart[id] = (cart[id] || 0) + 1;
+    updateCart();
+  }
+
+  function updateCart() {
+    const entries = Object.entries(cart);
+    const count = entries.reduce((sum, [, qty]) => sum + qty, 0);
+
+    document.getElementById("cartCount").textContent = count;
+
+    document.getElementById("cartItems").innerHTML =
+      entries.length
+        ? entries.map(([id, qty]) => {
+            const p = products.find(item => item.id === Number(id));
+            return `
+              <div class="d-flex justify-content-between border-bottom py-2">
+                <span>${p.name} × ${qty}</span>
+                <span>₹${(p.price * qty).toLocaleString("en-IN")}</span>
+              </div>`;
+          }).join("")
+        : "<p>Your cart is empty.</p>";
+
+    const total = entries.reduce((sum, [id, qty]) => {
+      return sum + products.find(p => p.id === Number(id)).price * qty;
+    }, 0);
+
+    document.getElementById("cartTotal").textContent =
+      total.toLocaleString("en-IN");
+  }
+
+  document.getElementById("searchForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const query = document.getElementById("search").value.toLowerCase();
+    renderProducts(products.filter(p => p.name.toLowerCase().includes(query)));
+  });
+
+  document.getElementById("checkoutBtn").addEventListener("click", () => {
+    if (Object.keys(cart).length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+    alert("Demo checkout only. Connect a payment gateway to accept payments.");
+  });
+
+  renderProducts(products);
+  updateCart();
+</script>
+
+</body>
+</html>
